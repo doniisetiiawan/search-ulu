@@ -24,6 +24,7 @@
     "react/jsx-one-expression-per-line": "off",
     "no-underscore-dangle": "off",
     "consistent-return": "off",
-    "eqeqeq": "off"
+    "eqeqeq": "off",
+    "no-console": "off"
   }
 }

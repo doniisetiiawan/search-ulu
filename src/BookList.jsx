@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { Component } from 'react';
 import BookListHeader from './BookListHeader';
 import BookTableHeader from './BookTableHeader';
@@ -18,8 +19,6 @@ class BookList extends Component {
       ],
     };
   }
-
-  shouldComponentUpdate = () => false;
 
   _selectRandomColor = () => {
     const randomColor = this.state.colors[

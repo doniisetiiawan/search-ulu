@@ -1,11 +1,10 @@
 /* eslint-disable react/jsx-filename-extension,react/no-access-state-in-setstate */
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import sortBy from 'sort-by';
 import Update from 'immutability-helper';
 import Immutable from 'immutable';
 import Spinner from './Spinner';
 import BookList from './BookList';
-import BookRow from './BookRow';
 import Header from './Header';
 import Form from './Form';
 
@@ -23,11 +22,7 @@ class App extends Component {
       searchTerm: '',
       totalPages: 1,
     };
-
-    this.searchInput = createRef();
   }
-
-  _toggleSorting = () => (this.state.sorting === 'asc' ? 'desc' : 'asc');
 
   _sortByTitle = () => {
     const sortByAttribute = this.state.sorting === 'asc' ? 'title' : '-title';
@@ -41,31 +36,6 @@ class App extends Component {
     });
     this.setState(newState);
   };
-
-  _displaySearchResults = () => {
-    if (this.state.searching) {
-      return <Spinner />;
-    }
-    if (this.state.searchCompleted) {
-      return (
-        <BookList
-          searchCount={this.state.totalBooks}
-          _sortByTitle={this._sortByTitle}
-        >
-          {this._renderBooks()}
-        </BookList>
-      );
-    }
-  };
-
-  _renderBooks = () => this.state.books.map((book) => (
-    <BookRow
-      key={book.edition_key}
-      title={book.title}
-      author_name={book.author_name}
-      edition_count={book.edition_count}
-    />
-  ));
 
   _performSearch = (searchTerm) => {
     console.log(searchTerm);
