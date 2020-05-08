@@ -1,10 +1,13 @@
-/* eslint-disable react/jsx-filename-extension */
+/* eslint-disable react/jsx-filename-extension,react/no-access-state-in-setstate */
 import React, { Component, createRef } from 'react';
 import sortBy from 'sort-by';
 import Update from 'immutability-helper';
+import Immutable from 'immutable';
 import Spinner from './Spinner';
 import BookList from './BookList';
 import BookRow from './BookRow';
+import Header from './Header';
+import Form from './Form';
 
 class App extends Component {
   constructor(props) {
@@ -13,9 +16,12 @@ class App extends Component {
     this.state = {
       books: [],
       totalBooks: 0,
-      searchCompleted: false,
+      offset: 100,
       searching: false,
       sorting: 'asc',
+      page: 1,
+      searchTerm: '',
+      totalPages: 1,
     };
 
     this.searchInput = createRef();
@@ -61,12 +67,9 @@ class App extends Component {
     />
   ));
 
-  _performSearch = () => {
-    const searchTerm = this.searchInput.current.value;
-    this.setState({
-      searchCompleted: false,
-      searching: true,
-    });
+  _performSearch = (searchTerm) => {
+    console.log(searchTerm);
+    this.setState({ searching: true, searchTerm });
     this._searchOpenLibrary(searchTerm);
   };
 
@@ -83,47 +86,55 @@ class App extends Component {
 
   _parseJSON = (response) => response.json();
 
+  _searchAgain = () => {
+    if (this.state.page > this.state.totalPages) {
+      this.setState({ searching: false });
+    } else {
+      this._searchOpenLibrary(this.state.searchTerm);
+    }
+  };
+
   _updateState = (response) => {
     const jsonResponse = response;
+    const newBooks = this.state.books.concat(
+      jsonResponse.docs,
+    );
+    const totalPages = jsonResponse.numFound / this.state.offset + 1;
+    const nextPage = this.state.page + 1;
 
-    this.setState({
-      books: jsonResponse.docs,
-      totalBooks: jsonResponse.numFound,
-      searchCompleted: true,
-      searching: false,
-    });
+    this.setState(
+      {
+        books: newBooks,
+        totalBooks: jsonResponse.numFound,
+        page: nextPage,
+        totalPages,
+      },
+      this._searchAgain,
+    );
   };
 
   render() {
-    const tabStyles = { paddingTop: '5%' };
+    const style = Immutable.Map({ paddingTop: '5%' });
 
     return (
       <div className="container">
-        <div className="row" style={tabStyles}>
-          <div className="col-lg-8 col-lg-offset-2">
-            <h4>
-              Open Library | Search any book you want!
-            </h4>
-            <div className="input-group">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search books..."
-                ref={this.searchInput}
-              />
-              <span className="input-group-btn">
-                <button
-                  className="btn btn-default"
-                  type="button"
-                  onClick={this._performSearch}
-                >
-                  Go!
-                </button>
-              </span>
-            </div>
-          </div>
-        </div>
-        {this._displaySearchResults()}
+        <Header style={style} />
+        <Form
+          style={style}
+          performSearch={this._performSearch}
+        />
+
+        {this.state.totalBooks > 0
+          ? (
+            <BookList
+              searchCount={this.state.totalBooks}
+              _sortByTitle={this._sortByTitle}
+              books={this.state.books}
+            />
+          )
+          : null }
+
+        { this.state.searching ? <Spinner /> : null }
       </div>
     );
   }

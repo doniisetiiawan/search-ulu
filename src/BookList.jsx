@@ -1,34 +1,66 @@
-import React from 'react';
+import React, { Component } from 'react';
+import BookListHeader from './BookListHeader';
+import BookTableHeader from './BookTableHeader';
 import RowAlternator from './RowAlternator';
+import BookRow from './BookRow';
 
-export default function BookList(props) {
-  return (
-    <div className="row">
-      <div className="col-lg-8 col-lg-offset-2">
-        <span className="text-center">
-          Total Results: {props.searchCount}
-        </span>
-        <table className="table table-stripped">
-          <thead>
-            <tr>
-              <th>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <a href="#" onClick={props._sortByTitle}>
-                  Title
-                </a>
-              </th>
-              <th>Author</th>
-              <th>No. of Editions</th>
-            </tr>
-          </thead>
-          <RowAlternator
-            firstColor="white"
-            secondColor="lightgrey"
-          >
-            {props.children}
-          </RowAlternator>
-        </table>
+class BookList extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      colors: [
+        'grey',
+        'lightgreen',
+        'yellow',
+        'lightblue',
+        'lightgrey',
+      ],
+    };
+  }
+
+  shouldComponentUpdate = () => false;
+
+  _selectRandomColor = () => {
+    const randomColor = this.state.colors[
+      Math.floor(Math.random() * this.state.colors.length)
+    ];
+    console.log(randomColor);
+    return randomColor;
+  };
+
+  _renderBooks = () => this.props.books.map((book, idx) => (
+    <BookRow
+      key={idx}
+      index={idx + 1}
+      title={book.title}
+      author_name={book.author_name}
+      edition_count={book.edition_count}
+    />
+  ));
+
+  render() {
+    return (
+      <div className="row">
+        <div>
+          <BookListHeader
+            searchCount={this.props.searchCount}
+          />
+          <table className="table table-stripped">
+            <BookTableHeader
+              sortByTitle={this.props._sortByTitle}
+            />
+            <RowAlternator
+              firstColor="white"
+              secondColor={this._selectRandomColor()}
+            >
+              {this._renderBooks()}
+            </RowAlternator>
+          </table>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
+
+export default BookList;
